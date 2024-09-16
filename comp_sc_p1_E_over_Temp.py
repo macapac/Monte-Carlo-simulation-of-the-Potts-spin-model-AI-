@@ -150,7 +150,7 @@ plt.colorbar()
 # Displaying the plot
 plt.show()'''
 
-def gen_plot(A, dim, T, q, iter):
+def gen_plot(A, dim, T, q, iter, burn_in, no_batches):
     # Erstelle das Plot-Fenster
     plt.ion()  # Schalte interaktiven Modus ein
     fig, ax = plt.subplots()
@@ -161,9 +161,17 @@ def gen_plot(A, dim, T, q, iter):
     plt.ylabel('y-axis')
     plt.colorbar(heatmap)
 
-    k_total = 0  # Zähler für akzeptierte Zustände
-    Energy_over_time = np.zeros(int(iter/10000))
+    burn_in_iters = iter*burn_in
+    batch_size = (iter-burn_in_iters) // no_batches
+
+
+    # Storing information about each batch
+    k_total = 0  # Counter for accepted states
     j = 0
+    batch_idx = 0
+    batch_energy_sum = 0
+    batch_energies = np.zeros(no_batches)
+
 
     for i in (range(iter)):
         row, col, s_new = random_spin(A.shape[0], q)
@@ -183,16 +191,38 @@ def gen_plot(A, dim, T, q, iter):
             heatmap.set_array(A)  # Aktualisiere das Array in der Heatmap
             plt.draw()  # Zeichne das Bild neu
             plt.pause(0.01)  # Kurze Pause, um das Bild zu aktualisieren
-            Energy_over_time[j] = E/(dim**2)
-            j += 1
+
+        if i > burn_in_iters: # After the burn in is finished
+            total_energy += dE
+            batch_energy_sum += total_energy / (dim**2) # Getting a sum of the energies over the whole batch
+
+            if (i-burn_in_iters) % batch_size == 0 and batch_idx<no_batches: # When the batch is finished but the number of batches are not done
+
+                batch_energies[batch_idx] = batch_energy_sum/batch_size
+                batch_idx += 1
+                batch_energy_sum = 0
+
+        elif i == burn_in_iters: # only runs once when the burn in is done, and doesn't get checked again
+            total_energy = calc_E(A)
 
     plt.ioff()  # Schalte den interaktiven Modus wieder aus
     plt.show()
 
+    # Plot the average energy per batch
     fig2 = plt.figure()
-    plt.plot(Energy_over_time)
+    plt.plot(range(no_batches), batch_energies)
+    plt.title(f"Average Energy per Batch (T={T}, q={q})")
+    plt.xlabel('Batch')
+    plt.ylabel('Average Energy')
     plt.show()
-# gen_plot(A, dim, T, q)
+
+    print(f"Energy calculated through updating: {total_energy}") # This clearly doesn't work
+    print(f"Energy calculated at final state: {calc_E(A)}")
+
+    print(f"Batch energy values:{batch_energies}")
+
+
+gen_plot(create_random_array(500, 10), 500, 1.5, 10, 10**7, 0.1,6)
 
 def calc_dn(A, row, col):
     B = A
@@ -250,7 +280,7 @@ def heat_bath_algorithm(A, T, q, iter):
         if i % 10000 == 0:
             # print(f"Iteration: {i}, Akzeptierte Zustände: {k_total}")
             E = calc_E(A)
-            avr_E = E / (dim ** 2)
+            avr_E = E / (len(A) ** 2)
             plt.title(f"Batch Iteration: {i / 10000}, accepted flips: {k_total}, avr energy: {avr_E} ")
             heatmap.set_array(A)  # Aktualisiere das Array in der Heatmap
             plt.draw()  # Zeichne das Bild neu
@@ -336,5 +366,5 @@ def Energy_over_time_plot_gen(T):
     plt.ylabel("Energy")
     plt.show()
 
-Energy_over_Temp_plot_gen()
+# Energy_over_Temp_plot_gen()
 # Energy_over_time_plot_gen(1.5)
