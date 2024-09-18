@@ -1,25 +1,25 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Erstelle einen gemeinsamen Bereich für die X-Achse
+# Create a common range for the X-axis
 x1 = np.linspace(0, 10, 100)
 x2 = np.linspace(0, 2*np.pi, 100)
 
-# Definiere die beiden Funktionen
-y1 = np.sin(x1)  # Sinus-Funktion für den ersten Bereich
-y2 = np.cos(x2)  # Kosinus-Funktion für den zweiten Bereich
+# Define the two functions
+y1 = np.sin(x1)  # Sine function for the first range
+y2 = np.cos(x2)  # Cosine function for the second range
 
-# Erstelle das Plot
+# Create the plot
 plt.plot(x1, y1, 'b-', label="sin(x1)")
 plt.plot(x2, y2, 'r-', label="cos(x2)")
 
-# Beschriftungen und Titel
-plt.xlabel('X Achse')
-plt.ylabel('Y Achse')
-plt.title('Sinus und Kosinus auf gemeinsamer X-Achse')
+# Labels and title
+plt.xlabel('X axis')
+plt.ylabel('Y axis')
+plt.title('Sine and Cosine on a Common X-Axis')
 
-# Legende hinzufügen
+# Add a legend
 plt.legend()
 
-# Anzeigen des Plots
+# Display the plot
 plt.show()
