@@ -145,6 +145,7 @@ def accept_new_state(p):
     return np.random.random() < p
 
 from tqdm import tqdm
+
 '''for i in tqdm(range(1000000)):
     row, col, s_new = random_spin(A.shape[0], q)
     dE = calc_dE(A, row, col, s_new)
@@ -223,9 +224,10 @@ def gen_plot(A, dim, T, q, iter):
     plt.ioff()  # Schalte den interaktiven Modus wieder aus
     plt.show()
 
-    fig2 = plt.figure()
+    plt.figure()
     plt.plot(Energy_over_time)
     plt.show()
+
 # gen_plot(A, dim, T, q)
 
 def calc_dn(A, row, col):
@@ -292,47 +294,43 @@ def Energy_over_Temp_plot_gen():
     iter = 10**7
     dim = 50
 
-    x_axis_q2 = np.array([0.02, 0.4, 0.8, 1.0, 1.13, 1.25, 1.45, 1.75, 2.0])
+    # x_axis_q2 = np.array([0.02, 0.4, 0.8, 1.0, 1.13, 1.25, 1.45, 1.75, 2.0])
     Energy_over_temp_q2 = np.zeros(9)
-    x_axis_q10 = np.array([0.02, 0.1, 0.3, 0.5, 0.6, 0.7, 0.8, 1.0, 1.5, 2.0])
-    Energy_over_temp_q10 = np.zeros(10)
+    x_axis_q10 = np.array([i/10 for i in range(1, 29, 4)])
+    Energy_over_temp_q10 = np.zeros(7)
     from tqdm import tqdm
 
     j = 0
-    for T in (x_axis_q2):
-        q = 2
-        A = create_random_array(dim, q)
-        E_old = calc_E(A)/ (dim**2)
-        k = 0
-        for i in tqdm(range(iter)):
-            row, col, s_new = random_spin(A.shape[0], q)
-            dE = calc_dE(A, row, col, s_new)
-            p = prop_to_accept_flip(dE, T)
-
-            if accept_new_state(p):
-                A[row, col] = s_new
-            '''if i % 10000 == 0 and i > 10**5:
-                E_new = calc_E(A)/(dim**2)
-                abs = np.abs(E_new - E_old)
-                eps = 10**(-4)
-                if abs < eps:
-                    k += 1
-                    if k == 5:
-                        break
-                else:
-                    k = 0
-                E_old = E_new'''
-
-        E = calc_E(A)
-        Energy_over_temp_q2[j] = E / (dim ** 2)
-        j += 1
+    # for T in (x_axis_q2):
+    #     q = 2
+    #     A = create_random_array(dim, q)
+    #     for i in tqdm(range(iter)):
+    #         row, col, s_new = random_spin(A.shape[0], q)
+    #         dE = calc_dE(A, row, col, s_new)
+    #         p = prop_to_accept_flip(dE, T)
+    #
+    #         if accept_new_state(p):
+    #             A[row, col] = s_new
+    #         '''if i % 10000 == 0 and i > 10**5:
+    #             E_new = calc_E(A)/(dim**2)
+    #             abs = np.abs(E_new - E_old)
+    #             eps = 10**(-4)
+    #             if abs < eps:
+    #                 k += 1
+    #                 if k == 5:
+    #                     break
+    #             else:
+    #                 k = 0
+    #             E_old = E_new'''
+    #
+    #     E = calc_E(A)
+    #     Energy_over_temp_q2[j] = E / (dim ** 2)
+    #     j += 1
 
     j = 0
     for T in (x_axis_q10):
         q  = 10
         A = create_random_array(dim, q)
-        E_old = calc_E(A) / (dim ** 2)
-        k = 0
         for i in tqdm(range(iter)):
             row, col, s_new = random_spin(A.shape[0], q)
             dE = calc_dE(A, row, col, s_new)
@@ -355,12 +353,23 @@ def Energy_over_Temp_plot_gen():
         Energy_over_temp_q10[j] = E / (dim ** 2)
         j += 1
 
-    plt.plot(x_axis_q2, Energy_over_temp_q2)
-    plt.plot(x_axis_q10, Energy_over_temp_q10)
-    plt.title(f"q = {q}, {iter} iterations")
-    plt.xlabel("Temperatur")
+    # plt.plot(x_axis_q2, Energy_over_temp_q2)
+
+    discontinuities = np.where(np.diff(Energy_over_temp_q10) >= 0.2)[0]  # Get indices where the gap is too large
+    Energy_over_temp_q10_gaps = Energy_over_temp_q10.copy()
+    x_axis_q10_gaps = x_axis_q10.copy()
+
+    # Insert np.nan *between* values to break the line, but keep points plotted
+    for idx in discontinuities:
+        Energy_over_temp_q10_gaps = np.insert(Energy_over_temp_q10, idx + 1, np.nan)
+        x_axis_q10_gaps = np.insert(x_axis_q10, idx+1, np.nan)
+
+    plt.plot(x_axis_q10_gaps, Energy_over_temp_q10_gaps, marker='o', linestyle='-', color='black')
+    plt.grid()
+    plt.title(f"q = {q}, {iter} iterations, discontinuity at critical temperature")
+    plt.xlabel("Temperature")
     plt.ylabel("Energy")
-    plt.ylim(-1.05, -0.45)
+    # plt.ylim(-1.05, -0.45)
     plt.show()
 
 def Energy_over_time_plot_gen(q, T, start, iter, dim):
@@ -503,19 +512,27 @@ def comp_E_over_Temp(iter, dim):
     plt.plot(x_axis_q2, Energy_over_temp_heatbath, label='heatbath')
     plt.plot(x_axis_q2, Energy_over_temp_metro, label='metropolis')
     plt.title(f"Heat-bath vs. Metropolis")
-    plt.xlabel("Temperatur")
+    plt.xlabel("Temperature")
     plt.ylabel("Energy")
     plt.ylim(-1.05, -0.85)
     plt.legend()
     plt.show()
 
+# def plot_energy_distribution(array, q):
+#     flat_array = array.flatten()
+#
+#     # Plot energy distribution
+#     plt.figure(figsize=(8, 6))
+#     plt.hist(flat_array, bins=q, edgecolor='black', alpha=0.7)
+#     plt.title("Energy Distribution")
+#     plt.xlabel("Energy levels")
+#     plt.ylabel("Frequency")
+#     plt.grid(True)
+#     plt.show()
 
 
-# Energy_over_Temp_plot_gen()
+Energy_over_Temp_plot_gen()
 # Energy_over_time_plot_gen(2, 0.02, 'hot', 6, 500)
 # heat_bath_algorithm(2, 6, 500)
 # comp_metropolis_heatbath(2, 500, 6, 'hot')
-comp_E_over_Temp(6, 500)
-
-
-'''test'''
+# comp_E_over_Temp(3, 500)
