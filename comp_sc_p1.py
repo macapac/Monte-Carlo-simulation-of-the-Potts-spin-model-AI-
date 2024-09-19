@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import random
 
-T = 5
+T = 0.02
 q = 10
 dim = 50
 iter = 10**6
@@ -13,7 +13,7 @@ def create_random_array(dim, q):
     return np.random.choice(np.arange(1.0,  q+1, 1.0), size=(dim, dim))
 
 A = create_random_array(dim, q) #hot start
-#A = np.ones((dim,dim)) #cold start?
+A = np.ones((dim,dim)) #cold start?
 
 # Function to show the heat map
 '''plt.imshow(A, cmap='autumn')
@@ -213,7 +213,7 @@ def gen_plot(A, dim, T, q, iter):
     plt.ion()  # Schalte interaktiven Modus ein
     fig, ax = plt.subplots()
 
-    heatmap = ax.imshow(A, cmap='autumn')  # Erstes Bild anzeigen
+    heatmap = ax.imshow(A, cmap='autumn', vmin=1, vmax=q)  # Erstes Bild anzeigen
     plt.title("2-D Heat Map")
     plt.xlabel('x-axis')
     plt.ylabel('y-axis')
@@ -239,6 +239,7 @@ def gen_plot(A, dim, T, q, iter):
             heatmap.set_array(A)  # Aktualisiere das Array in der Heatmap
             plt.draw()  # Zeichne das Bild neu
             plt.pause(0.01)  # Kurze Pause, um das Bild zu aktualisieren
+
 
     plt.ioff()  # Schalte den interaktiven Modus wieder aus
     plt.show()
@@ -312,7 +313,7 @@ def heat_bath_algorithm(A, T, q, iter):
 
 # heat_bath_algorithm(A, T, q, iter)
 gen_plot(A, dim, T, q, iter)
-
+'''
 import h5py
 
 def add_matrix_to_hdf5(file_name, array, metadata, array_name):
@@ -336,3 +337,4 @@ with h5py.File(file_name, 'r') as hf:
     print(loaded_array)
     print("Metadata for Array 2:")
     print(loaded_metadata)
+'''
