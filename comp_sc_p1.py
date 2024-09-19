@@ -1,17 +1,19 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import random
 
-T = 0.7
+T = 5
 q = 10
-dim = 500
+dim = 50
 iter = 10**6
 
 def create_random_array(dim, q):
 
     return np.random.choice(np.arange(1.0,  q+1, 1.0), size=(dim, dim))
 
-A = create_random_array(dim, q)
+A = create_random_array(dim, q) #hot start
+#A = np.ones((dim,dim)) #cold start?
 
 # Function to show the heat map
 '''plt.imshow(A, cmap='autumn')
@@ -160,7 +162,7 @@ def prop_to_accept_flip(dE, T):
 
 def random_spin(dim, q):
 
-    return np.random.randint(0, dim), np.random.randint(0, dim), np.random.randint(1,q)
+    return int(dim*random.random()), int(dim*random.random()), 1+int(q*random.random())
 
 def accept_new_state(p):
 
