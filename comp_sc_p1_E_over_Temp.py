@@ -291,41 +291,37 @@ def heat_bath_algorithm(T, iter, dim):
 
 def Energy_over_Temp_plot_gen():
 
-    iter = 10**7
+    iter = 10**6
     dim = 50
 
-    # x_axis_q2 = np.array([0.02, 0.4, 0.8, 1.0, 1.13, 1.25, 1.45, 1.75, 2.0])
-    Energy_over_temp_q2 = np.zeros(9)
+    x_axis_q2 = np.array([i/10 for i in range(1, 29, 2)])
+    Energy_over_temp_q2 = np.zeros(14)
     x_axis_q10 = np.array([i/10 for i in range(1, 29, 4)])
     Energy_over_temp_q10 = np.zeros(7)
     from tqdm import tqdm
 
     j = 0
-    # for T in (x_axis_q2):
-    #     q = 2
-    #     A = create_random_array(dim, q)
-    #     for i in tqdm(range(iter)):
-    #         row, col, s_new = random_spin(A.shape[0], q)
-    #         dE = calc_dE(A, row, col, s_new)
-    #         p = prop_to_accept_flip(dE, T)
-    #
-    #         if accept_new_state(p):
-    #             A[row, col] = s_new
-    #         '''if i % 10000 == 0 and i > 10**5:
-    #             E_new = calc_E(A)/(dim**2)
-    #             abs = np.abs(E_new - E_old)
-    #             eps = 10**(-4)
-    #             if abs < eps:
-    #                 k += 1
-    #                 if k == 5:
-    #                     break
-    #             else:
-    #                 k = 0
-    #             E_old = E_new'''
-    #
-    #     E = calc_E(A)
-    #     Energy_over_temp_q2[j] = E / (dim ** 2)
-    #     j += 1
+    for T in (x_axis_q2):
+        q = 2
+        A = create_random_array(dim, q)
+        for i in tqdm(range(iter)):
+            row, col, s_new = random_spin(A.shape[0], q)
+            dE = calc_dE(A, row, col, s_new)
+            p = prop_to_accept_flip(dE, T)
+
+            if accept_new_state(p):
+                A[row, col] = s_new
+
+        E = calc_E(A)
+        Energy_over_temp_q2[j] = E / (dim ** 2)
+        j += 1
+
+    plt.plot(x_axis_q2, Energy_over_temp_q2, marker='o', linestyle='-', color='black')
+    plt.grid()
+    plt.title(f"q = {q}, {iter} iterations, No discontinuity at critical temperature")
+    plt.xlabel("Temperature")
+    plt.ylabel("Energy")
+    plt.show()
 
     j = 0
     for T in (x_axis_q10):
@@ -338,22 +334,10 @@ def Energy_over_Temp_plot_gen():
 
             if accept_new_state(p):
                 A[row, col] = s_new
-            '''if i % 10000 == 0 and i > 10**5:
-                    E_new = calc_E(A)/(dim**2)
-                    abs = np.abs(E_new - E_old)
-                    eps = 10**(-4)
-                    if abs < eps:
-                        k += 1
-                        if k == 5:
-                            break
-                    else:
-                        k = 0
-                    E_old = E_new'''
+
         E = calc_E(A)
         Energy_over_temp_q10[j] = E / (dim ** 2)
         j += 1
-
-    # plt.plot(x_axis_q2, Energy_over_temp_q2)
 
     discontinuities = np.where(np.diff(Energy_over_temp_q10) >= 0.2)[0]  # Get indices where the gap is too large
     Energy_over_temp_q10_gaps = Energy_over_temp_q10.copy()
@@ -369,7 +353,6 @@ def Energy_over_Temp_plot_gen():
     plt.title(f"q = {q}, {iter} iterations, discontinuity at critical temperature")
     plt.xlabel("Temperature")
     plt.ylabel("Energy")
-    # plt.ylim(-1.05, -0.45)
     plt.show()
 
 def Energy_over_time_plot_gen(q, T, start, iter, dim):
