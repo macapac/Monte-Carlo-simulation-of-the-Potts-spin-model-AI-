@@ -293,10 +293,10 @@ def Energy_over_time_plot_gen(q, T, start, iter, dim):
             j += 1
 
     plt.plot(Energy_over_time)
-    plt.title(f"q = 2, T = {T}")
-    plt.xlabel("Time")
+    plt.title(f"Energy evolution per iteration, q = {q}, T = {T}")
+    plt.xlabel("Iteration")
     plt.ylabel("Energy")
-    plt.ylim(-1.05, -0.8)
+    # plt.ylim(-1.05, -0.8)
     plt.show()
 
 def comp_metropolis_heatbath(T, dim, iter, start):
@@ -470,7 +470,7 @@ def plot_energy_distribution(q, dim, T, iterations, batch_size, burn_in):
     colours = [blue, red]
 
     plt.hist([cold_averages, hot_averages], bins=20, label=['Cold start', 'Hot start'], color=colours)
-    plt.title("Energy distribution for cold and hot start, q = 10, T = Tc = 0.7012")
+    plt.title(f"Energy distribution for cold and hot start, q = {q}, T = Tc = 0.7012")
     plt.xlabel("Energy Level")
     plt.ylabel("Frequency")
     plt.legend()
@@ -480,8 +480,11 @@ def plot_energy_distribution(q, dim, T, iterations, batch_size, burn_in):
 
 
 Energy_over_Temp_plot_gen()
-Energy_over_time_plot_gen(2, 0.02, 'hot', 6, 500)
+Energy_over_time_plot_gen(2, 0.02, 'hot', 7, 500)
+Energy_over_time_plot_gen(2,5,'cold', 7, 500)
+Energy_over_time_plot_gen(10, 0.02,'hot', 7, 500)
+Energy_over_time_plot_gen(10,5,'cold', 7, 500)
 heat_bath_algorithm(2, 6, 500)
 comp_metropolis_heatbath(2, 500, 6, 'hot')
 comp_E_over_Temp(6, 500)
-plot_energy_distribution(10,50,0.7012,10**8,10**5,10**6)
+plot_energy_distribution(2,50,0.7012,10**8,10**5,10**6)
