@@ -2,58 +2,47 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import random
+from tqdm import tqdm
 
-T = 0.02
-q = 10
-dim = 50
-iter = 10**6
 
 def create_random_array(dim, q):
 
     return np.random.choice(np.arange(1.0,  q+1, 1.0), size=(dim, dim))
 
-A = create_random_array(dim, q) #hot start
-A = np.ones((dim,dim)) #cold start?
+def create_constant_start_array(dim, state):
 
-# Function to show the heat map
-'''plt.imshow(A, cmap='autumn')
+    return np.full((dim, dim), state)
 
-# Adding details to the plot
-plt.title("2-D Heat Map")
-plt.xlabel('x-axis')
-plt.ylabel('y-axis')
+def create_cluster_start_array(dim, q):
 
-# Adding a color bar to the plot
-plt.colorbar()
+    array_size = (dim, dim)  # Size of 2D array
+    num_picks = 10*dim  # number of random picks
+    dist_threshold = 5  # distance of points to center of cluster
 
-# Displaying the plot
-plt.show()'''
+    # random array w/ values in 1 to 10
+    array = np.random.randint(1, 11, size=array_size)
 
-'''def sum_over_neighbors(A, row, col):
+    # Helper: calculate distance
+    def distance(x1, y1, x2, y2):
+        return np.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
-    sum = 0.0
-    if row == 0:
-        sum += A[row + A.shape[0] - 1, col] + A[row + 1, col]
-    elif row == A.shape[0] - 1:
-        sum += A[row - 1, col] + A[row - A.shape[0] + 1, col]
-    else:
-        sum += A[row - 1, col] + A[row + 1, col]
+    # draw 25 random points and set all points in a radius of 5 to the value of the random point
+    for _ in range(num_picks):
+        # random coordinates of center point
+        x, y = np.random.randint(0, array_size[0]), np.random.randint(0, array_size[1])
 
-    if col == 0:
-        sum += A[row, col + A.shape[0] - 1] + A[row, col + 1]
-    elif col == A.shape[0] - 1:
-        sum += A[row, col - 1] + A[row, col - A.shape[0] + 1]
-    else:
-        sum += A[row, col - 1] + A[row, col + 1]
+        # value of center point
+        value = array[x, y]
 
-    return sum'''
+        # change neighbors
+        for i in range(array_size[0]):
+            for j in range(array_size[1]):
+                if distance(x, y, i, j) < dist_threshold:
+                    array[i, j] = value
+    return array
 
-'''def deltaE (A,i,j):
-
-    return 2.0 * A[i,j] * sum_over_neighbors(A, i, j)'''
-
-
-def calc_dE_Enew(A, row, col, q):
+# calculate the energy of a lattice site for the new spin 
+def calc_dE_Enew(A, row, col, q): 
 
     sum = 0.0
     if row == 0:
@@ -90,7 +79,7 @@ def calc_dE_Enew(A, row, col, q):
 
     return -sum
 
-
+# calculate energy of a lattice site for the old spin 
 def calc_dE_Eold(A, row, col):
     sum = 0.0
     q = A[row, col]
@@ -128,10 +117,12 @@ def calc_dE_Eold(A, row, col):
 
     return -sum
 
+# calculate chance in energy for new state
 def calc_dE(A, row, col, q):
 
     return calc_dE_Enew(A, row, col, q) - calc_dE_Eold(A, row, col)
 
+# calculate energy of the state A
 def calc_E(A):
 
     A_up = np.roll(A, 1, axis=0)
@@ -141,73 +132,22 @@ def calc_E(A):
 
     return -np.sum((A_up == A) + (A_down == A) + (A_left == A) + (A_right == A))
 
-'''def get_total_energy(self):
-    # Nearest neighbor interactions using np.roll
-    nn_up = np.roll(self.spin_array, 1, axis=0)
-    nn_down = np.roll(self.spin_array, -1, axis=0)
-    nn_left = np.roll(self.spin_array, 1, axis=1)
-    nn_right = np.roll(self.spin_array, -1, axis=1)
-
-    # Compute energy by checking if spins are the same (delta function)
-    energy = -np.sum((self.spin_array == nn_up) +
-                     (self.spin_array == nn_down) +
-                     (self.spin_array == nn_left) +
-                     (self.spin_array == nn_right))
-
-    return energy'''
-
+#calculate the probability to accept a new state
 def prop_to_accept_flip(dE, T):
 
     return min(1, np.exp((-1) * dE / T))
 
+# return a random new spin
 def random_spin(dim, q):
 
     return int(dim*random.random()), int(dim*random.random()), 1+int(q*random.random())
 
+# check if new state is accepted
 def accept_new_state(p):
 
     return np.random.random() < p
 
-from tqdm import tqdm
-'''for i in tqdm(range(1000000)):
-    row, col, s_new = random_spin(A.shape[0], q)
-    dE = calc_dE(A, row, col, s_new)
-    p = prop_to_accept_flip(dE, T)
-    k = 0
-    if accept_new_state(p):
-        A[row, col] = s_new
-        k += 1
-
-    if i%10000 == 0:
-        print(k)
-        print()
-        # Function to show the heat map
-        plt.imshow(A, cmap='autumn')
-
-        # Adding details to the plot
-        plt.title("2-D Heat Map")
-        plt.xlabel('x-axis')
-        plt.ylabel('y-axis')
-
-        # Adding a color bar to the plot
-        plt.colorbar()
-        plt.show()'''
-
-'''print(k)
-# Function to show the heat map
-plt.imshow(A, cmap='autumn')
-
-# Adding details to the plot
-plt.title("2-D Heat Map")
-plt.xlabel('x-axis')
-plt.ylabel('y-axis')
-
-# Adding a color bar to the plot
-plt.colorbar()
-
-# Displaying the plot
-plt.show()'''
-
+# generate a heatmap plot for the Metropolis algorithm
 def gen_plot(A, dim, T, q, iter):
     # Erstelle das Plot-Fenster
     plt.ion()  # Schalte interaktiven Modus ein
@@ -244,8 +184,7 @@ def gen_plot(A, dim, T, q, iter):
     plt.ioff()  # Schalte den interaktiven Modus wieder aus
     plt.show()
 
-# gen_plot(A, dim, T, q)
-
+# calculate Delta N for the heat-bath algorithm
 def calc_dn(A, row, col):
     B = A
     if row==0:
@@ -263,14 +202,17 @@ def calc_dn(A, row, col):
 
     return (-2)*(B[row-1, col] + B[row+1, col] + B[row, col-1] + B[row, col+1])+12
 
+# calculate the probability to accept a new state for the heat-bath algorithm
 def prop_heat_bath(T, deltaN):
 
     beta = 1/T
     return np.exp(beta*deltaN/2)/(np.exp(beta*deltaN/2)+np.exp(-beta*deltaN/2))
 
+# check if new state is accepted for the heat-bath algorithm
 def accept_flip_heat_bath(p):
     return np.random.random() < p
 
+# generate a heatmap plot for the heat-bath algorithm
 def heat_bath_algorithm(A, T, q, iter):
 
     assert q == 2, "q has to be 2 for heat-bath algorithm"
@@ -287,7 +229,7 @@ def heat_bath_algorithm(A, T, q, iter):
     k_total = 0  # Zähler für akzeptierte Zustände
 
     for i in (range(iter)):
-        row, col, s_new = random_spin(A.shape[0], q)
+        row, col, s_new = random_spin(A.shape[0], 2)
         #dE = calc_dE(A, row, col, s_new)
         dN = calc_dn(A, row, col)
         #p = prop_to_accept_flip(dE, T)
@@ -295,7 +237,10 @@ def heat_bath_algorithm(A, T, q, iter):
 
 
         if accept_new_state(p):
-            A[row, col] = s_new
+            A[row, col] = 1
+            k_total += 1
+        else:
+            A[row, col] = 2
             k_total += 1
 
         # Aktualisiere alle 10.000 Schritte den Plot
@@ -311,30 +256,17 @@ def heat_bath_algorithm(A, T, q, iter):
     plt.ioff()  # Schalte den interaktiven Modus wieder aus
     plt.show()
 
-# heat_bath_algorithm(A, T, q, iter)
-gen_plot(A, dim, T, q, iter)
-'''
-import h5py
+####################################
+# Type your system setting in here #
+#################################### 
 
-def add_matrix_to_hdf5(file_name, array, metadata, array_name):
-    with h5py.File(file_name, 'a') as hf:  # 'a' bedeutet: Anhängen/Öffnen ohne zu überschreiben
-        hf.create_dataset(array_name, data=array)  # Speichere das neue Array
-        meta_grp = hf.create_group(f'{array_name}_metadata')  # Gruppe für Metadaten erstellen
-        for key, value in metadata.items():
-            meta_grp.attrs[key] = value  # Speichere Metadaten als Attribute
+T = 0.02                                # Temperature
+q = 10                                   # states
+dim = 50                                # dimension of 2d array
+iter = 10**7                            # iterations
+A = create_random_array(dim, q)         # hot start 
+# A = create_cluster_start_array(dim, q)  # clustered start
+# A = create_constant_start_array(dim, 1) # cold start
 
-array_name = 'testarray'
-file_name = 'test.h5'
-metadata = {"Temp": T, "dim": dim, "iterations": iter, "q": q}
-
-add_matrix_to_hdf5(file_name, A, metadata, array_name)
-
-with h5py.File(file_name, 'r') as hf:
-    loaded_array = hf['testarray'][:]  # Zugriff auf 'array2'
-    loaded_metadata = dict(hf['testarray_metadata'].attrs)  # Zugriff auf Metadaten von 'array2'
-
-    print("Array 2:")
-    print(loaded_array)
-    print("Metadata for Array 2:")
-    print(loaded_metadata)
-'''
+# heat_bath_algorithm(A, T, q, iter)        # generate heatmap plot for Heat-Bath algorithm
+gen_plot(A, dim, T, q, iter)                # generate heatmap plot for Metropolis algorithm

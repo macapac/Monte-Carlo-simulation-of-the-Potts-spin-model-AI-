@@ -562,9 +562,9 @@ def plot_energy_distribution(q, dim, T, iterations, batch_size, burn_in):
 
 
 
-Energy_over_Temp_plot_gen()
+# Energy_over_Temp_plot_gen()
 # Energy_over_time_plot_gen(2, 0.02, 'hot', 6, 500)
-# heat_bath_algorithm(2, 6, 500)
+heat_bath_algorithm(2, 6, 500)
 # comp_metropolis_heatbath(2, 500, 6, 'hot')
 # comp_E_over_Temp(3, 500)
 # plot_energy_distribution(10,50,0.7012,10**8,10**5,10**6)
