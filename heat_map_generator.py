@@ -149,17 +149,17 @@ def accept_new_state(p):
 
 # generate a heatmap plot for the Metropolis algorithm
 def gen_plot(A, dim, T, q, iter):
-    # Erstelle das Plot-Fenster
-    plt.ion()  # Schalte interaktiven Modus ein
+    # create plot window
+    plt.ion()  # activate interactive mode
     fig, ax = plt.subplots()
 
-    heatmap = ax.imshow(A, cmap='autumn', vmin=1, vmax=q)  # Erstes Bild anzeigen
+    heatmap = ax.imshow(A, cmap='autumn', vmin=1, vmax=q)  # show first heatmap
     plt.title("2-D Heat Map")
     plt.xlabel('x-axis')
     plt.ylabel('y-axis')
     plt.colorbar(heatmap)
 
-    k_total = 0  # Zähler für akzeptierte Zustände
+    k_total = 0  # count accepted flips
 
     for i in (range(iter)):
         row, col, s_new = random_spin(A.shape[0], q)
@@ -170,18 +170,18 @@ def gen_plot(A, dim, T, q, iter):
             A[row, col] = s_new
             k_total += 1
 
-        # Aktualisiere alle 10.000 Schritte den Plot
+        # update after every 10000 steps
         if i % 10000 == 0:
-        # print(f"Iteration: {i}, Akzeptierte Zustände: {k_total}")
+        # print Iteration and accepted flips
             E = calc_E(A)
             avr_E = E/(dim**2)
             plt.title(f"Batch Iteration: {i/10000}, accepted flips: {k_total}, avr energy: {avr_E} ")
-            heatmap.set_array(A)  # Aktualisiere das Array in der Heatmap
-            plt.draw()  # Zeichne das Bild neu
-            plt.pause(0.01)  # Kurze Pause, um das Bild zu aktualisieren
+            heatmap.set_array(A)  # update array in heatmap
+            plt.draw()  # draw new image
+            plt.pause(0.01)  # short pause to update image
 
 
-    plt.ioff()  # Schalte den interaktiven Modus wieder aus
+    plt.ioff()  # deactivate interactive mode
     plt.show()
 
 # calculate Delta N for the heat-bath algorithm
@@ -217,24 +217,21 @@ def heat_bath_algorithm(A, T, q, iter):
 
     assert q == 2, "q has to be 2 for heat-bath algorithm"
 
-    plt.ion()  # Schalte interaktiven Modus ein
+    plt.ion()  # activate interactive mode
     fig, ax = plt.subplots()
 
-    heatmap = ax.imshow(A, cmap='autumn')  # Erstes Bild anzeigen
+    heatmap = ax.imshow(A, cmap='autumn')  # show first heatmap
     plt.title("Heat-Bath")
     plt.xlabel('x-axis')
     plt.ylabel('y-axis')
     plt.colorbar(heatmap)
 
-    k_total = 0  # Zähler für akzeptierte Zustände
+    k_total = 0  # count accepted flips
 
     for i in (range(iter)):
         row, col, s_new = random_spin(A.shape[0], 2)
-        #dE = calc_dE(A, row, col, s_new)
         dN = calc_dn(A, row, col)
-        #p = prop_to_accept_flip(dE, T)
         p = prop_heat_bath(T, dN)
-
 
         if accept_new_state(p):
             A[row, col] = 1
@@ -243,25 +240,24 @@ def heat_bath_algorithm(A, T, q, iter):
             A[row, col] = 2
             k_total += 1
 
-        # Aktualisiere alle 10.000 Schritte den Plot
+        # update after every 10000 steps
         if i % 10000 == 0:
-            # print(f"Iteration: {i}, Akzeptierte Zustände: {k_total}")
             E = calc_E(A)
             avr_E = E / (dim ** 2)
             plt.title(f"Batch Iteration: {i / 10000}, accepted flips: {k_total}, avr energy: {avr_E} ")
-            heatmap.set_array(A)  # Aktualisiere das Array in der Heatmap
-            plt.draw()  # Zeichne das Bild neu
-            plt.pause(0.01)  # Kurze Pause, um das Bild zu aktualisieren
+            heatmap.set_array(A)  # update array in heatmap
+            plt.draw()  # draw new image
+            plt.pause(0.01)  # short pause to update image
 
-    plt.ioff()  # Schalte den interaktiven Modus wieder aus
+    plt.ioff()  # deactivate interactive mode
     plt.show()
 
 ####################################
-# Type your system setting in here #
+# Type your system settings in here #
 #################################### 
 
 T = 0.02                                # Temperature
-q = 10                                   # states
+q = 10                                  # states
 dim = 50                                # dimension of 2d array
 iter = 10**7                            # iterations
 A = create_random_array(dim, q)         # hot start 
